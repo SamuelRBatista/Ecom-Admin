@@ -1,0 +1,15 @@
+.layout {
+    display: flex;
+  }
+  
+  .sidebar {
+    width: 250px; /* Ajuste conforme o tamanho desejado */
+    /* Outras propriedades de estilo para o Sidebar */
+  }
+  
+  .content {
+    flex: 1;
+    padding: 20px;
+    /* Outras propriedades de estilo para o conteúdo */
+  }
+  

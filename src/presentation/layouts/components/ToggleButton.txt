@@ -1,0 +1,10 @@
+
+const ToggleButton = ({ onClick }) => {
+  return (
+    <div className="toggle" onClick={onClick}>
+      <ion-icon name="menu-outline"></ion-icon>
+    </div>
+  );
+};
+
+export default ToggleButton;
