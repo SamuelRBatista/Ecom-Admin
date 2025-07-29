@@ -19,6 +19,7 @@ export default function ProductFormPage() {
   const navigate = useNavigate();
   const { categories } = useCategory();
   const productService = new ProductService();
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
@@ -50,17 +51,27 @@ export default function ProductFormPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {   
-      const newProduct: Product = {
-        id: 0,
-        ...formData,
-      };
-      await productService.create(newProduct);
+
+    try {
+      const form = new FormData();
+      form.append('name', formData.name);
+      form.append('description', formData.description);
+      form.append('price', formData.price.toString());
+      form.append('sku', formData.sku);
+      form.append('barCode', formData.barCode);
+      form.append('categoryId', formData.categoryId.toString());
+
+      if (imageFile) {
+        form.append('Image', imageFile); // <-- Corrigido aqui
+      }
+
+      await productService.create(form);
       navigate('/panel/product');
     } catch (err) {
       console.error('Erro ao salvar produto', err);
     }
   };
+
 
   return (
     <SidebarLayout isCollapsed={false}>
@@ -126,28 +137,30 @@ export default function ProductFormPage() {
                 </div>
                 <div style={styles.formRow}>                   
                     <div style={styles.halfWidth}>                       
-                        <TextField
-                            id="barcode"
-                            label="Código de barras:"
-                            type="text"
-                            name="barcode"
-                            value={formData.barCode}
-                            onChange={handleInputChange}  
-                            style={styles.formControl}                                                  
-                        />             
+                         <TextField
+                          id="barcode"
+                          label="Código de barras:"
+                          type="text"
+                          name="barCode"
+                          value={formData.barCode}
+                          onChange={handleInputChange}
+                          style={styles.formControl}
+                        />          
                     </div>
                 </div>
-                <div style={styles.formGroup}>                   
-                    <TextField
-                        id="imageUrl"
-                        label="Imagem:"
-                        name="imageUrl"
-                        multiline
-                        maxRows={20}
-                        value={formData.imageUrl}
-                        onChange={handleInputChange}
-                        style={styles.formControl}
-                    />
+                <div style={styles.formGroup}>
+                  <InputLabel>Imagem:</InputLabel>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setImageFile(file);
+                      }
+                    }}
+                    style={styles.formControl}
+                  />
                 </div>
 
                 <div style={styles.halfWidth}>                  

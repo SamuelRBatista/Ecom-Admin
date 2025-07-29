@@ -3,6 +3,7 @@ import type { Product } from '../../../../domain/entities/ecom/product/Product';
 import type { IProductRepository } from '../../../../domain/repositories/ecom/product/IProductRepository';
 
 export class ProductService implements IProductRepository {
+ 
   private baseUrl = 'http://localhost:5124/api/Products'; // ajuste conforme necessário
 
   async getAll(): Promise<Product[]> {
@@ -15,16 +16,22 @@ export class ProductService implements IProductRepository {
     return res.data;
   }
 
-  async create(product: Product): Promise<void> {    
-  await axios.post(this.baseUrl, product, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-}
+   async create(formData: FormData): Promise<Product> { 
+    const response = await axios.post<Product>(this.baseUrl, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });      
+    return response.data;
+  }
 
-  async update(product: Product): Promise<void> {
-    await axios.put(`${this.baseUrl}/${product.id}`, product);
+   async update(formData: FormData): Promise<void> {
+    const id = formData.get('id');
+    if (!id) throw new Error('Id do produto não fornecido no FormData');
+
+    await axios.put(`${this.baseUrl}/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
   }
 
   async delete(id: number): Promise<void> {
