@@ -11,16 +11,15 @@ import { faEdit, faInfoCircle, faTrash } from '@fortawesome/free-solid-svg-icons
 import SidebarLayout from '../../../layouts/components/SidebarLayout';
 import ConfirmModal from '../../../layouts/components/ConfirmModal';
 
-import { ProductService } from '../../../../infrastructure/services/ecom/product/ProductService';
+import { useAppContext } from '../../../../shared/contexts/ContextProvider';
 
-import useProducts from '../../../../shared/hooks/ecom/product/useProducts';
 import useCategory from '../../../../shared/hooks/ecom/product/useCategory';
 
 import styles from './styles';
 
 export default function ProductPage() {
-  const productService = new ProductService();
-  const { products, loading, error } = useProducts();
+  const { product } = useAppContext();
+  const { products, loading, error, deleteProduct } = product;
   const { categories } = useCategory();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
@@ -32,7 +31,7 @@ export default function ProductPage() {
 
   const handleDelete = async () => {
     try {
-      await productService.delete(selectedProductId!);
+    await deleteProduct(selectedProductId!);
       window.location.reload(); 
     } catch (error) {
       console.error('Erro ao excluir o produto:', error);
@@ -51,6 +50,7 @@ export default function ProductPage() {
   });
   
   const enrichedProducts = useMemo(() => {
+    debugger
     return products.map((product) => {
       const category = categories.find((c) => c.id === product.categoryId);
       return {
@@ -102,7 +102,7 @@ export default function ProductPage() {
           <div style={styles.recentOrders}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardTitle}>Produtos</h2>
-              <Link to="/cadastro/product" style={styles.btnNew}>Novo Produto</Link>
+              <Link to="/register/product" style={styles.btnNew}>Novo Produto</Link>
             </div>
             <Box sx={{ height: 500, width: '100%', mt: 4 }}>
               <DataGrid

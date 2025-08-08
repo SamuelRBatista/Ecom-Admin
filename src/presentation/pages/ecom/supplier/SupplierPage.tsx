@@ -11,34 +11,32 @@ import { faEdit, faInfoCircle, faTrash } from '@fortawesome/free-solid-svg-icons
 import SidebarLayout from '../../../layouts/components/SidebarLayout';
 import ConfirmModal from '../../../layouts/components/ConfirmModal';
 
-import { ClientService } from '../../../../infrastructure/services/ecom/client/ClientService';
-
-import {useClients} from '../../../../shared/hooks/ecom/client/useClients';
+import { useAppContext } from '../../../../shared/contexts/ContextProvider';
 import {useCities} from '../../../../shared/hooks/ecom/locality/useCities';
 import {useStates} from '../../../../shared/hooks/ecom/locality/useStates';
 
 import styles from './styles';
 
-export default function ClientPage() {
-  const clientService = new ClientService();
-  const { clients, loading, error } = useClients();
+export default function SuppliePage() {
+  const { supplier } = useAppContext();
+  const { suppliers, loading, error, deleteSupplier } = supplier;  
   const { cities } = useCities();
   const { states } = useStates();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [selectedSupplierId, setSelectedSupplierId] = useState<number | null>(null);
 
-  const handleOpenModal = (clientId: number) => {
-    setSelectedClientId(clientId);
+  const handleOpenModal = (supplierId: number) => {
+    setSelectedSupplierId(supplierId);
     setIsModalOpen(true);
   };
 
   const handleDelete = async () => {
     try {
-      await clientService.delete(selectedClientId!);
+      await deleteSupplier(selectedSupplierId!);
       window.location.reload();
     } catch (error) {
-      console.error('Erro ao excluir o client:', error);
+      console.error('Erro ao excluir o fornecedor:', error);
     } finally {
       setIsModalOpen(false);
     }
@@ -54,20 +52,20 @@ export default function ClientPage() {
   });
   
   const enrichedClients = useMemo(() => {
-    return clients.map((client) => {
-      const city = cities.find((c) => c.id === client.cityId);
-      const state = states.find((s) => s.id === client.stateId);
+    return suppliers.map((supplier) => {
+      const city = cities.find((c) => c.id === supplier.cityId);
+      const state = states.find((s) => s.id === supplier.stateId);
       return {
-        ...client,
+        ...supplier,
         cityName: city ? city.name : 'Cidade não encontrada',
         stateName: state ? `${state.name} (${state.uf})` : 'Estado não encontrado',
       };
     });
-  }, [clients, cities, states]);
+  }, [suppliers, cities, states]);
 
   const columns: GridColDef[] = [
     { field: 'name', headerName: 'Nome', flex: 1 },
-    { field: 'cpf', headerName: 'Cpf', flex: 1 },
+    { field: 'cnpj', headerName: 'Cnpj', flex: 1 },
     { field: 'email', headerName: 'E-mail', flex: 1 },
     { field: 'phoneNumber', headerName: 'Telefone', flex: 1 },
     { field: 'address', headerName: 'Endereço', flex: 1 },
@@ -83,10 +81,10 @@ export default function ClientPage() {
       filterable: false,
       renderCell: (params) => (
         <div style={{ display: 'flex', gap: '10px' }}>
-          <Link to={`/client/editar/${params.row.id}`} style={styles.actionIcon}>
+          <Link to={`/supplier/editar/${params.row.id}`} style={styles.actionIcon}>
             <FontAwesomeIcon icon={faEdit} />
           </Link>
-          <Link to={`/client/detalhes/${params.row.id}`} style={styles.actionIcon}>
+          <Link to={`/supplier/detalhes/${params.row.id}`} style={styles.actionIcon}>
             <FontAwesomeIcon icon={faInfoCircle} />
           </Link>
           <span
@@ -100,16 +98,16 @@ export default function ClientPage() {
     },
   ];
 
-  if (loading) return <p>Carregando clientes...</p>;
-  if (error) return <p>Erro ao carregar clientes.</p>;
+  if (loading) return <p>Carregando fornecedores...</p>;
+  if (error) return <p>Erro ao carregar fornecedores.</p>;
 
   return (
     <SidebarLayout isCollapsed={false}>
       <div style={styles.content}>
         <div style={styles.recentOrders}>
           <div style={styles.cardHeader}>
-            <h2 style={styles.cardTitle}>Clientes</h2>
-            <Link to="/register/client" style={styles.btnNew}>Novo Cliente</Link>
+            <h2 style={styles.cardTitle}>Fornecedores</h2>
+            <Link to="/register/supplier" style={styles.btnNew}>Novo Fornecedor</Link>
           </div>
           <Box sx={{ height: 500, width: '100%', mt: 4 }}>
             <DataGrid
@@ -127,7 +125,7 @@ export default function ClientPage() {
         <ConfirmModal
           isOpen={isModalOpen}
           title="Confirmar Exclusão"
-          message="Tem certeza de que deseja excluir este cliente? Esta ação é irreversível."
+          message="Tem certeza de que deseja excluir este fornecedor? Esta ação é irreversível."
           onConfirm={handleDelete}
           onCancel={handleCancel}
         />

@@ -1,28 +1,19 @@
 import { useState, useEffect } from 'react';
 import type { Client } from '../../../../domain/entities/ecom/client/Client';
+import { GetAllClients } from '../../../../application/usesCases/ecom/client/GetAllClients';
 import { ClientService } from '../../../../infrastructure/services/ecom/client/ClientService';
 
-export default function useClients() {
+export function useClients() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const service = new ClientService();
-        const data = await service.getAll();
-        setClients(data);
-      } catch (err) {
-        console.error('Failed to fetch clients', err);
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClients();
-  }, []);
-
+    const useCase = new GetAllClients(new ClientService());
+    useCase.execute()
+      .then(setClients)
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));      
+      }, []);
   return { clients, loading, error };
 }

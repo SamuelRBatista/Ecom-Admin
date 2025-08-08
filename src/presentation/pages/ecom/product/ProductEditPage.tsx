@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import {TextField, MenuItem, Select, InputLabel } from '@mui/material';
+import { TextField, MenuItem, Select, InputLabel } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
 
 import type { Product } from '../../../../domain/entities/ecom/product/Product';
-import { ProductService } from '../../../../infrastructure/services/ecom/product/ProductService';
-
+import { useAppContext } from '../../../../shared/contexts/ContextProvider';
 import useCategory from '../../../../shared/hooks/ecom/product/useCategory';
 
 import SidebarLayout from '../../../layouts/components/SidebarLayout';
@@ -16,9 +15,8 @@ export default function ProductEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { categories } = useCategory();
-  const productService = new ProductService();
+  const { product } = useAppContext(); // <-- usando contexto
   const [imageFile, setImageFile] = useState<File | null>(null);
-
 
   const [formData, setFormData] = useState<Product>({
     id: 0,
@@ -31,23 +29,22 @@ export default function ProductEditPage() {
     categoryId: 0,
   });
 
+  // Carrega produto pelo contexto
   useEffect(() => {
     if (id) {
       const loadProduct = async () => {
         try {
-          const product = await productService.getById(parseInt(id));
-          setFormData(product);
+          const p = await product.getProductById(parseInt(id)); // <-- via contexto
+          if (p) setFormData(p);
         } catch (error) {
           console.error('Erro ao buscar produto:', error);
         }
       };
       loadProduct();
     }
-  }, [id]);
+  }, [id, product]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -64,31 +61,33 @@ export default function ProductEditPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  try {
-    const form = new FormData();
-    form.append('id', formData.id.toString());
-    form.append('name', formData.name);
-    form.append('description', formData.description);
-    form.append('price', formData.price.toString());
-    form.append('sku', formData.sku);
-    form.append('barCode', formData.barCode);
-    form.append('categoryId', formData.categoryId.toString());
+    e.preventDefault();
+    try {
+      const form = new FormData();
+      form.append('id', formData.id.toString());
+      form.append('name', formData.name);
+      form.append('description', formData.description);
+      form.append('price', formData.price.toString());
+      form.append('sku', formData.sku);
+      form.append('barCode', formData.barCode);
+      form.append('categoryId', formData.categoryId.toString());
 
-    if (imageFile) {
-      form.append('Image', imageFile); 
+      if (imageFile) {
+        form.append('Image', imageFile);
+      }
+
+      if (formData.imageUrl) {
+        form.append('ExistingImageUrl', formData.imageUrl);
+      }
+
+      // Atualiza via contexto
+      await product.updateProduct(form);
+
+      navigate('/panel/product');
+    } catch (err) {
+      console.error('Erro ao atualizar produto', err);
     }
-
-    if (formData.imageUrl) {
-      form.append('ExistingImageUrl', formData.imageUrl);
-    }    
-
-    await productService.update(form); 
-    navigate('/panel/product');
-  } catch (err) {
-    console.error('Erro ao atualizar produto', err);
-  }
-};
+  };
 
   return (
     <SidebarLayout isCollapsed={false}>
@@ -166,31 +165,30 @@ export default function ProductEditPage() {
             </div>
           </div>
 
-      
-              <div style={styles.formGroup}>
-                {formData.imageUrl && (
-                  <div style={{ marginBottom: 10 }}>
-                    <p>Imagem atual:</p>
-                    <img
-                      src={formData.imageUrl}
-                      alt="Imagem atual"
-                      style={{ width: '150px', borderRadius: 4 }}
-                    />
-                  </div>
-                )}
-                  <InputLabel>Imagem:</InputLabel>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setImageFile(file);
-                      }
-                    }}
-                    style={styles.formControl}
-                  />
+          <div style={styles.formGroup}>
+            {formData.imageUrl && (
+              <div style={{ marginBottom: 10 }}>
+                <p>Imagem atual:</p>
+                <img
+                  src={formData.imageUrl}
+                  alt="Imagem atual"
+                  style={{ width: '150px', borderRadius: 4 }}
+                />
               </div>
+            )}
+            <InputLabel>Imagem:</InputLabel>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setImageFile(file);
+                }
+              }}
+              style={styles.formControl}
+            />
+          </div>
 
           <div style={styles.halfWidth}>
             <InputLabel id="application-status-label">Categoria</InputLabel>
@@ -217,8 +215,16 @@ export default function ProductEditPage() {
           </div>
 
           <div style={styles.formActions}>
-            <button type="submit" style={styles.btnSubmit}>Atualizar</button>
-            <button type="button" onClick={() => navigate('/panel/product')} style={styles.btnCancel}>Cancelar</button>
+            <button type="submit" style={styles.btnSubmit}>
+              Atualizar
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/panel/product')}
+              style={styles.btnCancel}
+            >
+              Cancelar
+            </button>
           </div>
         </form>
       </div>

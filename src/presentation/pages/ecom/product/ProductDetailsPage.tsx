@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import styles from './styles';
-import { ProductService } from '../../../../infrastructure/services/ecom/product/ProductService';
+import { useAppContext } from '../../../../shared/contexts/ContextProvider';
 import type { Product } from '../../../../domain/entities/ecom/product/Product';
 import useCategory from '../../../../shared/hooks/ecom/product/useCategory';
 import SidebarLayout from '../../../layouts/components/SidebarLayout';
@@ -10,16 +10,18 @@ import SidebarLayout from '../../../layouts/components/SidebarLayout';
 const ProductDetailsPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { product } = useAppContext();
   const [productData, setProductData] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const { categories } = useCategory();
+ 
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const service = new ProductService();
-        const data = await service.getById(Number(id));
-        setProductData(data);
+    
+        const d = await product.getProductById(Number(id));
+        setProductData(d);
       } catch (error) {
         console.error('Erro ao buscar produto:', error);
       } finally {

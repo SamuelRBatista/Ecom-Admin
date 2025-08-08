@@ -5,44 +5,44 @@ import styles from './styles';
 import { useStates } from '../../../../shared/hooks/ecom/locality/useStates';
 import { useCities } from '../../../../shared/hooks/ecom/locality/useCities';
 import { useAppContext } from '../../../../shared/contexts/ContextProvider'; // Importa o contexto
-import type { Client } from '../../../../domain/entities/ecom/client/Client';
+import type { Supplier } from '../../../../domain/entities/ecom/supplier/Supplier';
 import SidebarLayout from '../../../layouts/components/SidebarLayout';
 
-const ClientDetailsPage = () => {
+const SupplierDetailsPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { client } = useAppContext(); // pega do contexto
+  const { supplier } = useAppContext(); // pega do contexto
 
-  const [clientData, setClientData] = useState<Client | null>(null);
+  const [supplierData, setSupplierData] = useState<Supplier | null>(null);
   const [loading, setLoading] = useState(true);
 
   const { states } = useStates();
-  const { cities } = useCities(clientData?.stateId ?? 0);
+  const { cities } = useCities(supplierData?.stateId ?? 0);
 
   useEffect(() => {
-    const fetchClient = async () => {
+    const fetchSupplier = async () => {
       if (!id) return;
       setLoading(true);
       try {
-        const data = await client.getClientById(Number(id));
-        setClientData(data);
+        const data = await supplier.getSupplierById(Number(id));
+        setSupplierData(data);
       } catch (error) {
-        console.error('Erro ao buscar cliente:', error);
-        setClientData(null);
+        console.error('Erro ao buscar fornecedor:', error);
+        setSupplierData(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchClient();
+    fetchSupplier();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]); // só id como dependência
 
   if (loading) return <p>Carregando detalhes...</p>;
-  if (!clientData) return <p>Cliente não encontrado.</p>;
+  if (!supplierData) return <p>Forncedor não encontrado.</p>;
 
-  const stateName = states.find((state) => state.id === clientData.stateId)?.name || '';
-  const cityName = cities.find((city) => city.id === clientData.cityId)?.name || '';
+  const stateName = states.find((state) => state.id === supplierData.stateId)?.name || '';
+  const cityName = cities.find((city) => city.id === supplierData.cityId)?.name || '';
 
   return (
     <SidebarLayout isCollapsed={false}>
@@ -51,27 +51,27 @@ const ClientDetailsPage = () => {
 
         <div style={styles.formRow}>
           <label>Nome:</label>
-          <span>{clientData.name}</span>
+          <span>{supplierData.name}</span>
 
           <label>Cpf:</label>
-          <span>{clientData.cpf}</span>
+          <span>{supplierData.cnpj}</span>
         </div>
 
         <div style={styles.formRow}>
           <label>E-mail:</label>
-          <span>{clientData.email}</span>
+          <span>{supplierData.email}</span>
 
           <label>Telefone:</label>
-          <span>{clientData.phoneNumber}</span>
+          <span>{supplierData.phoneNumber}</span>
 
           <label>Cep:</label>
-          <span>{clientData.zipCode}</span>
+          <span>{supplierData.zipCode}</span>
 
           <label>Endereço:</label>
-          <span>{clientData.address}</span>
+          <span>{supplierData.address}</span>
 
           <label>Bairro:</label>
-          <span>{clientData.neighborhood}</span>
+          <span>{supplierData.neighborhood}</span>
         </div>
 
         <div style={styles.formRow}>
@@ -96,4 +96,4 @@ const ClientDetailsPage = () => {
   );
 };
 
-export default ClientDetailsPage;
+export default SupplierDetailsPage;

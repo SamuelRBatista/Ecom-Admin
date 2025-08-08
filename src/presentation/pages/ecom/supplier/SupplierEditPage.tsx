@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {TextField, MenuItem, Select, InputLabel } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
 
-import type { Client } from '../../../../domain/entities/ecom/client/Client';
+import type { Supplier } from '../../../../domain/entities/ecom/supplier/Supplier';
 import { useAppContext } from '../../../../shared/contexts/ContextProvider';
 
 import { useStates } from '../../../../shared/hooks/ecom/locality/useStates';
@@ -13,32 +13,32 @@ import { useCities } from '../../../../shared/hooks/ecom/locality/useCities';
 import SidebarLayout from '../../../layouts/components/SidebarLayout';
 import styles from './styles';
 
-type ClientFormData = Omit<Client, 'id'>;
+type SupplierFormData = Omit<Supplier, 'id'>;
 
-export default function ClientEditPage() {
+export default function SupplierEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { states } = useStates();
-  const [formData, setFormData] = useState<ClientFormData>({
-  name:'', cpf:'', email:'', phoneNumber:'', address:'',
+  const [formData, setFormData] = useState<SupplierFormData>({
+  name:'', cnpj:'', email:'', phoneNumber:'', address:'',
   neighborhood:'', zipCode:'', stateId:0, cityId:0,
 });
  const { cities } = useCities(formData.stateId);
- const { client } = useAppContext();
+ const { supplier } = useAppContext();
 
   useEffect(() => {
     console.log('ID dentro do useEffect:', id);
     if (id) {
-      const loadClient = async () => {
+      const loadSupplier = async () => {
         try {
-          const c = await client.getClientById(parseInt(id));
-          console.log('Cliente recebido do serviço:', client);
-          if(c) setFormData(c);
+         const s = await supplier.getSupplierById(parseInt(id));
+          console.log('Fornecedor recebido do serviço:', supplier);
+          if(s) setFormData(s);
         } catch (error) {
-          console.error('Erro ao buscar client:', error);
+          console.error('Erro ao buscar fornecedor:', error);
         }
       };
-      loadClient();
+      loadSupplier();
     }
   }, [id]);
 
@@ -55,14 +55,14 @@ export default function ClientEditPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const newClient: Client = {
+      const newSupplier: Supplier = {
             id: 0,
             ...formData,
        };
-      await client.updateClient(newClient);
-      navigate('/panel/client');
+      await supplier.updateSupplier(newSupplier);
+      navigate('/panel/supplier');
     } catch (err) {
-      console.error('Erro ao atualizar produto', err);
+      console.error('Erro ao atualizar o fornecedor', err);
     }
   };
 
@@ -81,7 +81,7 @@ export default function ClientEditPage() {
   return (
     <SidebarLayout isCollapsed={false}>
       <div style={styles.cadastroFormContainer}>
-        <h2 style={styles.title}>Editar Cliente</h2>
+        <h2 style={styles.title}>Editar Fornecedor</h2>
         <form onSubmit={handleSubmit} style={styles.cadastroForm}>
           <div style={styles.formGroup}>                 
             <TextField
@@ -103,7 +103,7 @@ export default function ClientEditPage() {
                     label="Cpf:"
                     type="text"
                     name="cpf"
-                    value={formData.cpf}
+                    value={formData.cnpj}
                     onChange={handleInputChange}
                     required 
                     style={styles.formControl}

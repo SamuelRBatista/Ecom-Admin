@@ -38,7 +38,7 @@ export default function Nav() {
           </Link>
         </li>
         <li>
-          <Link to="/panel/fornecedor">
+          <Link to="/panel/supplier">
             <span className="icon">
               <IoBusinessOutline />
             </span>

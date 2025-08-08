@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {TextField, MenuItem, Select, InputLabel } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
 
-import type { Client } from '../../../../domain/entities/ecom/client/Client';
+import type { Supplier } from '../../../../domain/entities/ecom/supplier/Supplier';
 import { useAppContext } from '../../../../shared/contexts/ContextProvider';  
 
 import { useStates } from '../../../../shared/hooks/ecom/locality/useStates';
@@ -14,14 +14,14 @@ import { useCities } from '../../../../shared/hooks/ecom/locality/useCities';
 import SidebarLayout from '../../../layouts/components/SidebarLayout';
 import styles from './styles';
 
-type ClientFormData = Omit<Client, 'id'>;
+type SupplierFormData = Omit<Supplier, 'id'>;
 
-export default function ClientFormPage() {
+export default function SupplierFormPage() {
   const navigate = useNavigate();
-  const { client } = useAppContext();
+  const { supplier } = useAppContext();
   const { states } = useStates();
-  const [formData, setFormData] = useState<ClientFormData>({
-  name:'', cpf:'', email:'', phoneNumber:'', address:'',
+  const [formData, setFormData] = useState<SupplierFormData>({
+  name:'', cnpj:'', email:'', phoneNumber:'', address:'',
   neighborhood:'', zipCode:'', stateId:0, cityId:0,
 });
   const { cities } = useCities(formData.stateId);
@@ -51,18 +51,18 @@ export default function ClientFormPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const newClient: Client = { id: 0, ...formData };
-      await client.createClient(newClient); // envia objeto Client diretamente
-      navigate('/panel/client');
+      const newSupplier: Supplier = { id: 0, ...formData };
+      await supplier.createSupplier(newSupplier); // envia objeto Client diretamente
+      navigate('/panel/supplier');
     } catch (err) {
-      console.error('Erro ao salvar client', err);
+      console.error('Erro ao salvar o fornecedor', err);
     }
   };
 
   return (
     <SidebarLayout isCollapsed={false}>
      <div style={styles.cadastroFormContainer}>
-            <h2 style={styles.title}>Cliente</h2>
+            <h2 style={styles.title}>Fornecedor</h2>
             <form onSubmit={handleSubmit} style={styles.cadastroForm}>
                 <div style={styles.formGroup}>                 
                     <TextField
@@ -81,11 +81,11 @@ export default function ClientFormPage() {
                 <div style={styles.formRow}>
                     <div style={styles.halfWidth}>                     
                         <TextField
-                            id="cpf"
-                            label="Cpf:"
+                            id="cnpj"
+                            label="Cnpj:"
                             type="text"
-                            name="cpf"
-                            value={formData.cpf}
+                            name="cnpj"
+                            value={formData.cnpj}
                             onChange={handleInputChange}
                             required 
                             style={styles.formControl}

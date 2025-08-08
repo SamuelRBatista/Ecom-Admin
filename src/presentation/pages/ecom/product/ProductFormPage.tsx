@@ -6,7 +6,7 @@ import {TextField, MenuItem, Select, InputLabel } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
 
 import type { Product } from '../../../../domain/entities/ecom/product/Product';
-import { ProductService } from '../../../../infrastructure/services/ecom/product/ProductService';
+import { useAppContext } from '../../../../shared/contexts/ContextProvider';
 
 import useCategory from '../../../../shared/hooks/ecom/product/useCategory';
 
@@ -18,7 +18,7 @@ type ProductFormData = Omit<Product, 'id'>;
 export default function ProductFormPage() {
   const navigate = useNavigate();
   const { categories } = useCategory();
-  const productService = new ProductService();
+  const { product } = useAppContext();
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState<ProductFormData>({
@@ -65,7 +65,7 @@ export default function ProductFormPage() {
         form.append('Image', imageFile); // <-- Corrigido aqui
       }
 
-      await productService.create(form);
+      await product.createProduct(form);
       navigate('/panel/product');
     } catch (err) {
       console.error('Erro ao salvar produto', err);
