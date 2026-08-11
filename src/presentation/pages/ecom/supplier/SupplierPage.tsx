@@ -1,57 +1,66 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-
-import { Box } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
-import type { GridColDef, GridPaginationModel } from '@mui/x-data-grid';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faInfoCircle, faTrash } from '@fortawesome/free-solid-svg-icons';
-
+import {
+  Box,
+  Stack,
+  Paper,
+  Typography,
+  Tooltip,
+  IconButton,
+} from '@mui/material';
+import { GridColDef, GridPaginationModel } from '@mui/x-data-grid';
+import { Edit, Info, Trash2, Plus } from 'lucide-react';
 import SidebarLayout from '../../../layouts/components/SidebarLayout';
-import ConfirmModal from '../../../layouts/components/ConfirmModal';
-
+import {
+  ConfirmModal,
+  DataTable,
+  PrimaryButton,
+} from '../../../components/shared';
 import { useAppContext } from '../../../../shared/contexts/ContextProvider';
+import { ErrorHandler } from '../../../../shared/helpers/ErrorHandler';
+import { colors } from '../../../themes/theme';
 import {useCities} from '../../../../shared/hooks/ecom/locality/useCities';
 import {useStates} from '../../../../shared/hooks/ecom/locality/useStates';
 
-import styles from './styles';
-
 export default function SuppliePage() {
   const { supplier } = useAppContext();
-  const { suppliers, loading, error, deleteSupplier } = supplier;  
-  const { cities } = useCities();
-  const { states } = useStates();
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { suppliers, loading, error, deleteSupplier } = supplier; 
+  const [isModalOpen, setIsModalOpen] = useState(false); 
   const [selectedSupplierId, setSelectedSupplierId] = useState<number | null>(null);
-
-  const handleOpenModal = (supplierId: number) => {
-    setSelectedSupplierId(supplierId);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = async () => {
-    try {
-      await deleteSupplier(selectedSupplierId!);
-      window.location.reload();
-    } catch (error) {
-      console.error('Erro ao excluir o fornecedor:', error);
-    } finally {
-      setIsModalOpen(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     pageSize: 10,
     page: 0,
   });
+  const { cities } = useCities();
+  const { states } = useStates();
+
+  const handleOpenModal = (supplierId: number) => {
+    setSelectedSupplierId(supplierId);
+    setIsModalOpen(true);
+    setDeleteError(null);
+  };
+
+   const handleDelete = useCallback(async () => {
+      if (!selectedSupplierId) return;
+      setIsDeleting(true);
+      try {
+        await deleteSupplier(selectedSupplierId);
+        setIsModalOpen(false);
+        setSelectedSupplierId(null);
+      } catch (err) {
+        setDeleteError(ErrorHandler.formatErrorMessage(err));
+      } finally {
+        setIsDeleting(false);
+      }
+    }, [selectedSupplierId, deleteSupplier]); 
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
   
-  const enrichedClients = useMemo(() => {
+  const enrichedSuppliers = useMemo(() => {
     return suppliers.map((supplier) => {
       const city = cities.find((c) => c.id === supplier.cityId);
       const state = states.find((s) => s.id === supplier.stateId);
@@ -80,56 +89,94 @@ export default function SuppliePage() {
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <Link to={`/supplier/editar/${params.row.id}`} style={styles.actionIcon}>
-            <FontAwesomeIcon icon={faEdit} />
-          </Link>
-          <Link to={`/supplier/detalhes/${params.row.id}`} style={styles.actionIcon}>
-            <FontAwesomeIcon icon={faInfoCircle} />
-          </Link>
-          <span
-            style={styles.actionIconDelete}
-            onClick={() => handleOpenModal(params.row.id)}
-          >
-            <FontAwesomeIcon icon={faTrash} />
-          </span>
-        </div>
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="Editar">
+            <Link to={`/supplier/editar/${params.row.id}`}>
+              <IconButton size="small" color="primary">
+                <Edit size={18} />
+              </IconButton>
+            </Link>
+          </Tooltip>
+          <Tooltip title="Detalhes">
+            <Link to={`/supplier/detalhes/${params.row.id}`}>
+              <IconButton size="small" color="info">
+                <Info size={18} />
+              </IconButton>
+            </Link>
+          </Tooltip>
+          <Tooltip title="Deletar">
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => handleOpenModal(params.row.id)}
+            >
+              <Trash2 size={18} />
+            </IconButton>
+          </Tooltip>
+        </Stack>
       ),
     },
   ];
-
-  if (loading) return <p>Carregando fornecedores...</p>;
-  if (error) return <p>Erro ao carregar fornecedores.</p>;
-
   return (
     <SidebarLayout isCollapsed={false}>
-      <div style={styles.content}>
-        <div style={styles.recentOrders}>
-          <div style={styles.cardHeader}>
-            <h2 style={styles.cardTitle}>Fornecedores</h2>
-            <Link to="/register/supplier" style={styles.btnNew}>Novo Fornecedor</Link>
-          </div>
-          <Box sx={{ height: 500, width: '100%', mt: 4 }}>
-            <DataGrid
-              rows={enrichedClients}
-              columns={columns}
-              paginationModel={paginationModel}
-              onPaginationModelChange={setPaginationModel}
-              pageSizeOptions={[5, 10, 20]}
-              getRowId={(row) => row.id}
-              disableRowSelectionOnClick
-              pagination
+      <Box sx={{ padding: '20px' }}>
+        <Paper
+          sx={{
+            borderRadius: '12px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            overflow: 'hidden',
+          }}
+          >
+            {/* Header */}
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                px: 3,
+                py: 2,
+                backgroundColor: colors.background,
+                borderBottom: `1px solid ${colors.border}`,
+              }}
+            >
+              <Typography variant="h2" sx={{ color: colors.primary }}>
+              Fornecedores
+              </Typography>
+              <Link to="/register/supplier" style={{ textDecoration: 'none' }}>
+                <PrimaryButton startIcon={<Plus size={20} />}>
+                  Novo Fornecedor
+                </PrimaryButton>
+              </Link>          
+            </Box>
+            {/* Content */}
+              <Box sx={{ padding: '1px' }}>
+                <DataTable
+                columns={columns}
+                rows={enrichedSuppliers}
+                loading={loading}
+                error={error ? ErrorHandler.formatErrorMessage(error) : null}
+                paginationModel={paginationModel}
+                onPaginationModelChange={setPaginationModel}
+                pageSizeOptions={[5, 10, 25]}
+                />
+              </Box>         
+            </Paper>
+            {/* Delete Modal */}
+            <ConfirmModal
+              open={isModalOpen}
+              title="Confirmar Exclusão"
+              message={
+                deleteError
+                  ? `Erro ao deletar: ${deleteError}`
+                  : 'Tem certeza que deseja deletar este fornecedor? Esta ação é irreversível.'
+              }
+              onConfirm={handleDelete}
+              onCancel={handleCancel}
+              loading={isDeleting}
+              confirmText="Deletar"
+              isDangerous={true}
             />
-          </Box>
-        </div>
-        <ConfirmModal
-          isOpen={isModalOpen}
-          title="Confirmar Exclusão"
-          message="Tem certeza de que deseja excluir este fornecedor? Esta ação é irreversível."
-          onConfirm={handleDelete}
-          onCancel={handleCancel}
-        />
-      </div>
+        </Box>    
     </SidebarLayout>
   );
 }

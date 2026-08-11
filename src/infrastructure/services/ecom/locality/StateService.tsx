@@ -6,6 +6,7 @@ export class StateService implements IStateRepository {
   private baseUrl = 'http://localhost:5124/api/State';
 
   async getAll(): Promise<State[]> {
+    debugger
     const res = await axios.get(this.baseUrl);
     return res.data;
   }

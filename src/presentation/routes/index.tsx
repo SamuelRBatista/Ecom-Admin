@@ -16,6 +16,7 @@ import SupplierPage  from '../pages/ecom/supplier/SupplierPage';
 import SupplierFormPage from '../pages/ecom/supplier/SupplierFormPage';
 import SupplierEditPage from '../pages/ecom/supplier/SupplierEditPage';
 import SupplierDetailsPage from '../pages/ecom/supplier/SupplierDetailsPage';
+import SalePage from '../pages/ecom/sale/SalePage';
 
 // import NotFoundPage from '../presentation/pages/NotFoundPage';
 
@@ -45,6 +46,8 @@ export function AppRoutes() {
       <Route path="/register/supplier" element={<SupplierFormPage />} />
       <Route path="/supplier/editar/:id" element={<SupplierEditPage />} />
       <Route path="/supplier/detalhes/:id" element={<SupplierDetailsPage />} />
+
+      <Route path="/panel/vendas" element={<SalePage />} />
      
       {/* <Route path="/products/create" element={<ProductFormPage />} />
       <Route path="/products/edit/:id" element={<ProductFormPage />} />

@@ -4,18 +4,16 @@ import { CityService } from '../../../../infrastructure/services/ecom/locality/C
 
 const cityService = new CityService();
 
-export const useCities = (stateId?: number) => {
+export const useCities = () => {
   const [cities, setCities] = useState<City[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (stateId === undefined) return;
-
     const fetchCities = async () => {
       setLoading(true);
       try {
-        const result = await cityService.getByStateId(stateId);
+        const result = await cityService.getAll();
         setCities(result);
       } catch (err) {
         setError('Erro ao carregar cidades');
@@ -25,7 +23,7 @@ export const useCities = (stateId?: number) => {
     };
 
     fetchCities();
-  }, [stateId]);
+  }, []);
 
   return { cities, loading, error };
 };

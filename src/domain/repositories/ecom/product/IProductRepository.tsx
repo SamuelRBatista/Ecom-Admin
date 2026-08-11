@@ -6,4 +6,5 @@ export interface IProductRepository {
   create(formData: FormData): Promise<Product>; 
   update(formData: FormData): Promise<void>;
   delete(id: number): Promise<void>;
+  sell(id: number, quantity: number): Promise<void>;
 }
