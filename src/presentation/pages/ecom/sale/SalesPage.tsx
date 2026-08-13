@@ -109,13 +109,14 @@ export default function SalesPage() {
         </Typography>
 
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={5}>
+          <Grid item xs={12} md={8}>
             <Autocomplete
+              sx={{ width: '100%' }}
               options={products}
               getOptionLabel={(option: any) => `${option.name} — R$ ${option.price?.toFixed?.(2) ?? option.price} (Estoque: ${option.stockQuantity ?? 0})`}
               value={selectedProduct}
               onChange={(e, v) => setSelectedProduct(v)}
-              renderInput={(params) => <TextField {...params} label="Produto" variant="outlined" />}
+              renderInput={(params) => <TextField {...params} label="Produto" variant="outlined" fullWidth />}
             />
           </Grid>
 
