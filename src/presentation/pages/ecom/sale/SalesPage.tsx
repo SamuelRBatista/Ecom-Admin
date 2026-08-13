@@ -109,7 +109,7 @@ export default function SalesPage() {
         </Typography>
 
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} md={10}>
             <Autocomplete
               sx={{ width: '100%' }}
               options={products}
