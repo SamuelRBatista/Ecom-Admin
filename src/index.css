@@ -398,6 +398,20 @@ body {
   font-weight: 500;
   line-height: 1.2rem;
 }
+
+/* Layout helpers for SidebarLayout component */
+.layout {
+  display: flex;
+}
+
+.content {
+  /* space to the right of the fixed sidebar */
+  margin-left: 300px;
+  width: calc(100% - 300px);
+  padding: 20px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
 .recentCustomers table tr td h4 span {
   font-size: 14px;
   color: var(--black2);
