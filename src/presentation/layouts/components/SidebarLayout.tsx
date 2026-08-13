@@ -10,9 +10,9 @@ interface SidebarLayoutProps {
 
 export default function SidebarLayout({ children, isCollapsed }: SidebarLayoutProps) {
   return (
-    <div style={{ display: 'flex' }}>
+    <div className="layout">
       <Sidebar isCollapsed={isCollapsed} />
-      <main style={{ flex: 1 }}>{children}</main>
+      <main className="content">{children}</main>
     </div>
   );
 }
