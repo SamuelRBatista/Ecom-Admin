@@ -108,8 +108,8 @@ export default function SalesPage() {
           Vendas
         </Typography>
 
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={10}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <Autocomplete
               sx={{ width: '100%' }}
               options={products}
@@ -120,29 +120,33 @@ export default function SalesPage() {
             />
           </Grid>
 
-          <Grid item xs={6} md={2}>
-            <TextField
-              label="Quantidade"
-              type="number"
-              inputProps={{ min: 1 }}
-              fullWidth
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-            />
-          </Grid>
+          <Grid item xs={12}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={6} md={2}>
+                <TextField
+                  label="Quantidade"
+                  type="number"
+                  inputProps={{ min: 1 }}
+                  fullWidth
+                  value={quantity}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
+                />
+              </Grid>
 
-          <Grid item xs={6} md={3}>
-            <TextField label="Motivo" fullWidth value={reason} onChange={(e) => setReason(e.target.value)} />
-          </Grid>
+              <Grid item xs={6} md={4}>
+                <TextField label="Motivo" fullWidth value={reason} onChange={(e) => setReason(e.target.value)} />
+              </Grid>
 
-          <Grid item xs={12} md={2}>
-            <Button variant="contained" color="primary" fullWidth onClick={handleSell} disabled={!selectedProduct || loading} startIcon={loading ? <CircularProgress size={18} /> : null}>
-              Registrar
-            </Button>
-          </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField label="Documento (opcional)" fullWidth value={documentNumber} onChange={(e) => setDocumentNumber(e.target.value)} />
+              </Grid>
 
-          <Grid item xs={12} md={6}>
-            <TextField label="Documento (opcional)" fullWidth value={documentNumber} onChange={(e) => setDocumentNumber(e.target.value)} />
+              <Grid item xs={12} md={2}>
+                <Button variant="contained" color="primary" fullWidth onClick={handleSell} disabled={!selectedProduct || loading} startIcon={loading ? <CircularProgress size={18} /> : null}>
+                  Registrar
+                </Button>
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
 
