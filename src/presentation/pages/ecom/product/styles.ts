@@ -27,12 +27,12 @@ const styles: Styles = {
 
   content: {
     position: 'relative',
-    width: '100%',
-    padding: '20px',
+    width: '120%',
+    padding: '30px',
     display: 'grid',
     gridTemplateColumns: '4fr 1fr',
-    gap: '30px',
-    marginLeft: '300px',
+    gap: '50px',
+    marginLeft: '15px',
   },
 
   recentOrders: {
@@ -67,7 +67,7 @@ const styles: Styles = {
 
   cadastroFormContainer: {
     width: '100%',
-    maxWidth: '900px',
+    // maxWidth: '900px',
     margin: '0 auto',
     padding: '30px',
     backgroundColor: '#fff',
